@@ -567,7 +567,9 @@ static NSString *const timedMetadata = @"timedMetadata";
     if (CMTimeCompare(current, cmSeekTime) != 0) {
       if (!_paused) [_player pause];
       [_player seekToTime:cmSeekTime toleranceBefore:tolerance toleranceAfter:tolerance completionHandler:^(BOOL finished) {
-        if (!_paused) [_player play];
+        if (!_paused) {
+            [self setPaused:false];
+        }
         if(self.onVideoSeek) {
             self.onVideoSeek(@{@"currentTime": [NSNumber numberWithFloat:CMTimeGetSeconds(item.currentTime)],
                                @"seekTime": [NSNumber numberWithFloat:seekTime],
