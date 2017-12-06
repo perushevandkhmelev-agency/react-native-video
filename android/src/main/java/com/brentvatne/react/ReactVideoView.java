@@ -215,13 +215,14 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mMainVer = expansionMainVersion;
         mPatchVer = expansionPatchVersion;
 
-
         mMediaPlayerValid = false;
         mVideoDuration = 0;
         mVideoBufferedDuration = 0;
 
-        initializeMediaPlayerIfNeeded();
+        mMediaPlayer.stop();
         mMediaPlayer.reset();
+        mMediaPlayer = null;
+        initializeMediaPlayerIfNeeded();
 
         try {
             if (isNetwork) {
@@ -346,6 +347,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
                 start();
 
                 // Also Start the Progress Update Handler
+                mProgressUpdateHandler.removeCallbacksAndMessages(null);
                 mProgressUpdateHandler.post(mProgressUpdateRunnable);
             }
         }
@@ -372,6 +374,11 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
     public void setProgressUpdateInterval(final float progressUpdateInterval) {
         mProgressUpdateInterval = progressUpdateInterval;
+
+        if (mMediaPlayerValid && !mPaused) {
+            mProgressUpdateHandler.removeCallbacksAndMessages(null);
+            mProgressUpdateHandler.post(mProgressUpdateRunnable);
+        }
     }
 
     public void setRateModifier(final float rate) {
@@ -409,6 +416,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public void onPrepared(MediaPlayer mp) {
 
         mMediaPlayerValid = true;
+        isCompleted = false;
         mVideoDuration = mp.getDuration();
 
         WritableMap naturalSize = Arguments.createMap();
@@ -434,6 +442,12 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD.toString(), event);
 
         applyModifiers();
+
+        if (!mPaused) {
+            // Also Start the Progress Update Handler
+            mProgressUpdateHandler.removeCallbacksAndMessages(null);
+            mProgressUpdateHandler.post(mProgressUpdateRunnable);
+        }
 
         if (mUseNativeControls) {
             initializeMediaControllerIfNeeded();
