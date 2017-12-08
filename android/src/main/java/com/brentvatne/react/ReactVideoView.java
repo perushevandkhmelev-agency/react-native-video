@@ -344,6 +344,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             }
         } else {
             if (!mMediaPlayer.isPlaying()) {
+                setRateModifier(mRate);
                 start();
 
                 // Also Start the Progress Update Handler
@@ -384,7 +385,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
     public void setRateModifier(final float rate) {
         mRate = rate;
 
-        if (mMediaPlayerValid) {
+        if (mMediaPlayerValid && !mPaused) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 mMediaPlayer.setPlaybackParams(mMediaPlayer.getPlaybackParams().setSpeed(rate));
             } else {
