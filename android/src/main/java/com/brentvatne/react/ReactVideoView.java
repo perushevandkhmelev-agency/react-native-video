@@ -221,6 +221,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
 
         mMediaPlayer.stop();
         mMediaPlayer.reset();
+        mMediaPlayer.release();
         mMediaPlayer = null;
         initializeMediaPlayerIfNeeded();
 
@@ -346,10 +347,7 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
             if (!mMediaPlayer.isPlaying()) {
                 setRateModifier(mRate);
                 start();
-
-                // Also Start the Progress Update Handler
-                mProgressUpdateHandler.removeCallbacksAndMessages(null);
-                mProgressUpdateHandler.post(mProgressUpdateRunnable);
+                setProgressUpdateInterval(mProgressUpdateInterval);
             }
         }
     }
@@ -443,12 +441,6 @@ public class ReactVideoView extends ScalableVideoView implements MediaPlayer.OnP
         mEventEmitter.receiveEvent(getId(), Events.EVENT_LOAD.toString(), event);
 
         applyModifiers();
-
-        if (!mPaused) {
-            // Also Start the Progress Update Handler
-            mProgressUpdateHandler.removeCallbacksAndMessages(null);
-            mProgressUpdateHandler.post(mProgressUpdateRunnable);
-        }
 
         if (mUseNativeControls) {
             initializeMediaControllerIfNeeded();
